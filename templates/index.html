@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leitor de Barcode ITF (html5-qrcode)</title>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        main {
+            width: 90%;
+            max-width: 600px;
+        }
+        /* 2. Define um container para o leitor de vídeo */
+        #leitor-container {
+            width: 100%;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        #resultado {
+            margin-top: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+            word-break: break-all;
+        }
+        #resultado span {
+            color: #008000;
+        }
+    </style>
+</head>
+<body>
+
+    <main>
+        <h1>Leitor de Barcode ITF</h1>
+        
+        <div id="leitor-container"></div>
+        
+        <div id="resultado">Aguardando leitura...</div>
+    </main>
+
+    <script>
+        /**
+         * 5. Função chamada quando a leitura é bem-sucedida
+         */
+        function onScanSuccess(decodedText, decodedResult) {
+            // O 'decodedText' é o conteúdo do código de barras
+            console.log(`Código lido: ${decodedText}`, decodedResult);
+            
+            let resultadoEl = document.getElementById('resultado');
+            resultadoEl.innerHTML = `Código lido: <span>${decodedText}</span>`;
+
+            // Opcional: Para parar o scanner após a primeira leitura, 
+            // descomente a linha abaixo. Você precisará da variável 'html5QrcodeScanner'
+            // no escopo global ou acessível aqui.
+            // html5QrcodeScanner.clear();
+        }
+
+        /**
+         * 6. Função (opcional) chamada em caso de falha 
+         * (útil para debug, mas pode ser barulhenta)
+         */
+        function onScanFailure(error) {
+            // Geralmente, apenas ignora, pois tenta ler continuamente.
+            // console.warn(`Erro de leitura: ${error}`);
+        }
+
+        /**
+         * 7. Cria e configura a instância do scanner
+         */
+        
+        // Armazena a instância para poder pará-la depois, se necessário
+        let html5QrcodeScanner = new Html5QrcodeScanner(
+            "leitor-container", // ID do elemento container
+            {
+                fps: 10, // Quadros por segundo para escanear
+                
+                // Define uma "caixa" de leitura retangular.
+                // Isso é muito melhor para barcodes (1D) do que o quadrado padrão.
+                qrbox: { width: 300, height: 100 },
+                
+                rememberLastUsedCamera: true, // Lembra a última câmera usada
+
+                // --- A PARTE MAIS IMPORTANTE ---
+                // Especifica quais formatos a biblioteca deve tentar decodificar.
+                // Por padrão, ela foca em QR_CODE.
+                formatsToSupport: [
+                    Html5QrcodeSupportedFormats.ITF,
+                    
+                    // Você pode adicionar outros formatos se precisar:
+                    // Html5QrcodeSupportedFormats.CODE_128,
+                    Html5QrcodeSupportedFormats.EAN_13,
+                    Html5QrcodeSupportedFormats.CODE_39
+                    // Html5QrcodeSupportedFormats.QR_CODE
+                ]
+            },
+            /* verbose= */ false // 'false' para não logar tudo no console
+        );
+
+        // 8. Inicia o scanner
+        html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+
+    </script>
+
+</body>
+</html>
